@@ -1,7 +1,8 @@
 import './phone.css';
-import photos from './photos.json';
+import photos from './gallery.json';
 import {Calculator, PocketPong} from './phone-tools.js';
 
+const escapeHTML=value=>String(value).replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 const paths={
  close:'M6 6l12 12M6 18 18 6',back:'m14 5-7 7 7 7',home:'m3 10 9-7 9 7v10H7V10m3 10v-7h4v7',
  github:'M8 20v-3c-4 1-4-2-5-2m14 5v-4c0-1-1-2-1-2 4 0 5-2 5-5 0-1-1-3-2-3 0-1 0-2-1-3l-4 2h-4L6 3C5 4 5 5 5 6 4 7 3 8 3 10c0 3 2 4 5 4 0 0-1 1-1 2v4',
@@ -59,17 +60,17 @@ export class PhonePanel {
   this.content.querySelector('.phone-back').focus({preventScroll:true});
  }
  photos(){
-  this.body.innerHTML=`<div class="phone-library"><h2>My camera roll</h2><p>10 moments, collected.</p><div class="phone-photo-grid">${photos.map((p,i)=>`<button data-photo="${i}" aria-label="View ${p.alt}"><img src="${p.src}" alt="${p.alt}" loading="lazy"></button>`).join('')}</div></div>`;
+  this.body.innerHTML=`<div class="phone-library"><h2>My camera roll</h2><p>${photos.length} moments, collected.</p><div class="phone-photo-grid">${photos.map((p,i)=>`<button data-photo="${i}" aria-label="View ${escapeHTML(p.alt)}"><img src="${p.thumbnail}" alt="${escapeHTML(p.alt)}" loading="lazy" decoding="async" width="${p.width}" height="${p.height}"></button>`).join('')}</div></div>`;
   this.body.querySelectorAll('[data-photo]').forEach(button=>button.addEventListener('click',()=>this.photo(Number(button.dataset.photo))));
  }
  photo(index){
-  const p=photos[index];this.body.innerHTML=`<div class="phone-photo-detail"><button class="phone-text-button" data-library>← All photos</button><figure><img src="${p.src}" alt="${p.alt}"><figcaption>${p.alt}</figcaption></figure><div class="phone-photo-nav"><button aria-label="Previous photo">${icon('back')}</button><span>${index+1} / ${photos.length}</span><button aria-label="Next photo">${icon('arrow')}</button></div></div>`;
+  const p=photos[index];this.body.innerHTML=`<div class="phone-photo-detail"><button class="phone-text-button" data-library>← All photos</button><figure><img src="${p.src}" alt="${escapeHTML(p.alt)}"><figcaption>${escapeHTML(p.alt)}</figcaption></figure><div class="phone-photo-nav"><button aria-label="Previous photo">${icon('back')}</button><span>${index+1} / ${photos.length}</span><button aria-label="Next photo">${icon('arrow')}</button></div></div>`;
   this.body.querySelector('[data-library]').addEventListener('click',()=>{this.photos();this.body.querySelector(`[data-photo="${index}"]`).focus();});
   const buttons=this.body.querySelectorAll('.phone-photo-nav button');buttons[0].addEventListener('click',()=>{this.photo((index+photos.length-1)%photos.length);this.body.querySelector('[aria-label="Previous photo"]').focus();});buttons[1].addEventListener('click',()=>{this.photo((index+1)%photos.length);this.body.querySelector('[aria-label="Next photo"]').focus();});
   this.body.querySelector('[data-library]').focus();
  }
  github(){
-  this.body.innerHTML=`<div class="phone-github"><div class="phone-profile-mark">m<span>↗</span></div><h2>MinhDuongg</h2><p>Building things.<br>Breaking things. Learning.</p><a class="phone-primary" href="https://github.com/MinhDuongg" target="_blank" rel="noopener noreferrer">View GitHub ${icon('arrow')}</a><a class="phone-repo" href="https://github.com/MinhDuongg/me" target="_blank" rel="noopener noreferrer"><span>${icon('github')}<strong>me</strong></span><p>The code behind this orbit.</p><span>JavaScript <b>↗</b></span></a></div>`;
+  this.body.innerHTML=`<div class="phone-github"><img class="phone-profile-avatar" src="assets/github-avatar.jpg" alt="MinhDuongg’s GitHub avatar" width="76" height="76"><h2>MinhDuongg</h2><p>Building things.<br>Breaking things. Learning.</p><a class="phone-primary" href="https://github.com/MinhDuongg" target="_blank" rel="noopener noreferrer">View GitHub ${icon('arrow')}</a><a class="phone-repo" href="https://github.com/MinhDuongg/me" target="_blank" rel="noopener noreferrer"><span>${icon('github')}<strong>me</strong></span><p>The code behind this orbit.</p><span>JavaScript <b>↗</b></span></a></div>`;
  }
  notes(){
   this.body.innerHTML=`<div class="phone-notes"><p class="phone-note-date">${new Date().toLocaleDateString('en',{month:'long',day:'numeric',year:'numeric'})}</p><label for="phone-note">A place for your thoughts.</label><textarea id="phone-note" spellcheck="true" placeholder="An idea, a reminder, anything…" maxlength="10000"></textarea><p class="phone-note-saved" role="status">Saved on this device</p></div>`;

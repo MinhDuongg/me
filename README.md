@@ -41,7 +41,7 @@ The workflow builds and tests every push and pull request, then publishes succes
 - **Photos:** tap to enlarge, tap outside or Escape to shrink and resume gravity. Drag to move or throw off-screen. Focus a print and press Delete to dismiss it, or arrows to throw it. Click the camera again to reset the ten-print pile.
 - **CRT computer:** the head introduces the GitHub link to [MinhDuongg](https://github.com/MinhDuongg).
 - **Job application:** click for the application-form jump scare. Tap anywhere or Escape to dismiss.
-- **Phone:** opens an interactive iPhone panel on the right (centered on mobile). Photos browses the ten images; GitHub opens the profile/repository; Notes saves locally; Worlds switches the live scene; Calculator supports keyboard input; Pong is playable with pointer, arrow keys or buttons; Camera releases the photo pile; Settings controls motion and wallpaper. Use the home indicator, Back, Escape, Close or tap outside to navigate/dismiss.
+- **Phone:** opens an interactive iPhone panel on the right (centered on mobile). Photos browses all 39 exported Lightroom images; GitHub opens the profile/repository; Notes saves locally; Worlds switches the live scene; Calculator supports keyboard input; Pong is playable with pointer, arrow keys or buttons; Camera releases the photo pile; Settings controls motion and wallpaper. Use the home indicator, Back, Escape, Close or tap outside to navigate/dismiss.
 - **Text input:** Enter or the arrow plays beep-and-bop speech with synchronized mouth animation and a theme-matched, head-attached dialogue panel.
 
 ## Source map
@@ -57,10 +57,15 @@ The workflow builds and tests every push and pull request, then publishes succes
 | `src/pong-loader.js` | Loader/game, inlined by the Vite plugin for immediate startup |
 | `src/job-scare.js` | Application-form overlay and procedural impact sound |
 | `src/style.css`, `src/scenes.js` | Layout, themes and background artwork |
-| `src/photos.json` | The ten photos and their descriptions |
+| `src/photos.json` | The ten falling photos and their descriptions |
+| `src/gallery.json`, `public/assets/gallery/` | Complete phone gallery, full images and lightweight thumbnails |
 | `public/assets/` | Head geometry, textures, web-sized photos, fonts and reference image |
 | `tests/` | Physics, timing, projection, interaction and build checks |
 
 All application assets are local. Audio is synthesized in the browser after interaction; no voice or external audio service is used. Reduced-motion settings skip unnecessary motion. The website needs a modern browser with WebGL2 and streaming decompression support.
 
 Third-party notices are in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). The personal head likeness and photographs are project content, not a general-purpose stock asset pack.
+
+## Refresh the phone gallery
+
+The phone gallery contains a web export of the selected local folder. To include new photos later, install Pillow and run `python3 scripts/import-photos.py /path/to/photos`, then commit and push the generated assets and manifest. The importer reads supported images recursively, creates thumbnails and 1600px images without EXIF metadata, and leaves originals unchanged. No local folder path is published. The falling photo pile uses its own ten-image selection.
