@@ -26,6 +26,12 @@ npm run preview
 
 The build uses relative paths, so `dist/` can be served from a root domain or a subdirectory by any static host. This repository does not depend on the temporary Cloudflare tunnel.
 
+## GitHub Pages
+
+In the repository's **Settings → Pages**, select **GitHub Actions** as the publishing source. GitHub Free requires a public repository for Pages; a private source repository requires a supported paid plan.
+
+The workflow builds and tests every push and pull request, then publishes successful builds from the repository's default branch. It can also be started from **Actions → Build, test and deploy → Run workflow**. The project address after deployment is `https://minhduongg.github.io/me/`.
+
 ## Interactions
 
 - **Loading:** full-screen playable Pong; automatic entry when all five models and shaders are ready.
