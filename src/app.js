@@ -1,3 +1,4 @@
+import {PhonePanel} from './phone.js';
 const universe = document.querySelector('.universe');
 const reduced = matchMedia('(prefers-reduced-motion: reduce)');
 const worlds = [{id:'original',label:'Original'},{id:'lowpoly',label:'Low poly'},{id:'blocks',label:'Blocks'},{id:'cubist',label:'Cubist'},{id:'pop',label:'Pop Art'}];
@@ -10,7 +11,7 @@ const satelliteDefinitions=[
  {x:.80,y:.28,size:154,label:'Camera',action:'camera'},
  {x:.80,y:.72,size:160,label:'CRT computer',action:'github'},
  {x:.21,y:.75,size:142,label:'Job application',action:'job'},
- {x:.91,y:.49,size:122,label:'Phone',action:'contact'},
+ {x:.91,y:.49,size:122,label:'Phone',action:'phone'},
 ];
 const githubUrl='https://github.com/MinhDuongg';
 let catAudio;
@@ -20,6 +21,7 @@ function meow(){
 function activateObject(id,index,button){
  const action=satelliteDefinitions[index].action;
  if(action==='cat'){const bubble=button.querySelector('.cat-speech');clearTimeout(button.catDismiss);bubble.hidden=false;button.dataset.meowing='true';meow();button.catDismiss=setTimeout(()=>{bubble.hidden=true;button.dataset.meowing='false';},1800);return;}
+ if(action==='phone'){phone.open(button);return;}
  if(action==='camera'){speaker.speak('Check this out!');photoPile.drop();return;}
  if(action==='job'){speaker.cancel();jobScare.show(button);return;}
  if(action==='github'){speaker.speak('Check out my stuff on my GitHub.');return;}
@@ -138,11 +140,12 @@ textInput?.addEventListener('focus',alignTextInput);textInput?.addEventListener(
 const jobScare=new OrbitJobScare(universe);
 const photoPile=new PhotoPile(document.querySelector('#photo-pile'));
 const speaker=new OrbitSpeech({form:document.querySelector('#speech-form'),input:textInput,bubble:document.querySelector('#speech-bubble'),content:document.querySelector('#speech-text'),stop:document.querySelector('#speech-stop')});
+const phone=new PhonePanel({getState:()=>state,onMotion:()=>{state.paused=!state.paused;syncMotion();},onWorld:index=>{targetDrift=index+Math.round((state.drift-index)/worlds.length)*worlds.length;},onCamera:()=>{speaker.speak('Check this out!');photoPile.drop();}});
 window.visualViewport?.addEventListener('resize',alignTextInput);window.visualViewport?.addEventListener('scroll',alignTextInput);
 
 const lightControl=document.querySelector('#pointer-light'),lightAim={x:.27,y:.22};
 function aimLight(e){
- if(!state.light.enabled||!panel.hidden||drag||e.target?.closest?.('.photo-card'))return;
+ if(!state.light.enabled||!panel.hidden||phone.opened||drag||e.target?.closest?.('.photo-card'))return;
  const rect=universe.getBoundingClientRect();
  lightAim.x=Math.max(0,Math.min(1,(e.clientX-rect.left)/rect.width));lightAim.y=Math.max(0,Math.min(1,(e.clientY-rect.top)/rect.height));state.light.active=true;
 }
@@ -177,21 +180,22 @@ document.querySelectorAll('[data-panel]').forEach(b=>b.addEventListener('click',
 document.querySelector('.close-panel').addEventListener('click',closePanel);backdrop.addEventListener('click',closePanel);
 document.querySelector('.wordmark')?.addEventListener('click',e=>{e.preventDefault();closePanel();targetDrift=0;});
 window.addEventListener('keydown',e=>{
+ if(phone.opened)return;
  if(e.target?.closest?.('input, textarea, select, [contenteditable="true"], .photo-card'))return;
  if(e.key==='Escape')closePanel();
  if(!panel.hidden&&e.key==='Tab'){const f=[...panel.querySelectorAll('a,button')];if(e.shiftKey&&document.activeElement===f[0]){e.preventDefault();f.at(-1).focus();}else if(!e.shiftKey&&document.activeElement===f.at(-1)){e.preventDefault();f[0].focus();}}
  if(panel.hidden&&['ArrowDown','PageDown','ArrowUp','PageUp'].includes(e.key)){e.preventDefault();targetDrift=Math.round(targetDrift)+(e.key.endsWith('Down')?1:-1);}
 });
 window.addEventListener('wheel',e=>{
- if(!panel.hidden||e.ctrlKey||e.target?.closest?.('.head-dialogue, .photo-card'))return;
+ if(phone.opened||!panel.hidden||e.ctrlKey||e.target?.closest?.('.head-dialogue, .photo-card'))return;
  if(drag){e.preventDefault();return;}
  e.preventDefault();
  const pixels=e.deltaY*(e.deltaMode===1?16:e.deltaMode===2?innerHeight:1),distance=Math.max(1100,universe.clientHeight*1.35);
  // One normalized input updates one position, including a trackpad's natural momentum tail.
  targetDrift+=Math.max(-distance*.18,Math.min(distance*.18,pixels))/distance;
 },{passive:false});
-universe.addEventListener('touchstart',e=>{if(panel.hidden&&!drag&&!e.target?.closest?.('.satellite, input, textarea, .head-dialogue, .photo-card'))pointerStart=e.touches[0].clientY;},{passive:true});
-universe.addEventListener('touchmove',e=>{if(!panel.hidden||drag||pointerStart===null)return;const y=e.touches[0].clientY;targetDrift+=(pointerStart-y)/Math.max(600,universe.clientHeight*.95);pointerStart=y;},{passive:true});
+universe.addEventListener('touchstart',e=>{if(!phone.opened&&panel.hidden&&!drag&&!e.target?.closest?.('.satellite, input, textarea, .head-dialogue, .photo-card'))pointerStart=e.touches[0].clientY;},{passive:true});
+universe.addEventListener('touchmove',e=>{if(phone.opened||!panel.hidden||drag||pointerStart===null)return;const y=e.touches[0].clientY;targetDrift+=(pointerStart-y)/Math.max(600,universe.clientHeight*.95);pointerStart=y;},{passive:true});
 universe.addEventListener('touchend',()=>pointerStart=null);
 universe.addEventListener('touchcancel',()=>pointerStart=null);
 

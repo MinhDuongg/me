@@ -41,7 +41,7 @@ The workflow builds and tests every push and pull request, then publishes succes
 - **Photos:** tap to enlarge, tap outside or Escape to shrink and resume gravity. Drag to move or throw off-screen. Focus a print and press Delete to dismiss it, or arrows to throw it. Click the camera again to reset the ten-print pile.
 - **CRT computer:** the head introduces the GitHub link to [MinhDuongg](https://github.com/MinhDuongg).
 - **Job application:** click for the application-form jump scare. Tap anywhere or Escape to dismiss.
-- **Phone:** opens Contact.
+- **Phone:** opens an interactive iPhone panel on the right (centered on mobile). Photos browses the ten images; GitHub opens the profile/repository; Notes saves locally; Worlds switches the live scene; Calculator supports keyboard input; Pong is playable with pointer, arrow keys or buttons; Camera releases the photo pile; Settings controls motion and wallpaper. Use the home indicator, Back, Escape, Close or tap outside to navigate/dismiss.
 - **Text input:** Enter or the arrow plays beep-and-bop speech with synchronized mouth animation and a theme-matched, head-attached dialogue panel.
 
 ## Source map
@@ -51,6 +51,7 @@ The workflow builds and tests every push and pull request, then publishes succes
 | `src/app.js` | Scene scrolling, accessible controls and object actions |
 | `src/head.js` | Three.js renderer, models, hair, lighting and scene placement |
 | `src/scene-props.js` | The five authored 3D props |
+| `src/phone.js`, `src/phone.css`, `src/phone-tools.js` | Interactive iPhone, eight apps, local notes, calculator and Pong |
 | `src/talking-rig.js`, `src/speech.js` | Mouth deformation and beep timing |
 | `src/photo-pile.js`, `src/photo-physics.js` | Gallery preview, drag/throw handling and Matter.js rigid bodies |
 | `src/pong-loader.js` | Loader/game, inlined by the Vite plugin for immediate startup |
