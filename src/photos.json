@@ -1,0 +1,62 @@
+[
+  {
+    "src": "assets/photo-01.jpg",
+    "alt": "Golden light at the Colosseum",
+    "ratio": 1.5005861664712778,
+    "source": "DSCF0146.jpg"
+  },
+  {
+    "src": "assets/photo-02.jpg",
+    "alt": "Inside an ornate church",
+    "ratio": 0.66640625,
+    "source": "DSCF0230.jpg"
+  },
+  {
+    "src": "assets/photo-03.jpg",
+    "alt": "Columns against a blue sky",
+    "ratio": 0.66640625,
+    "source": "DSCF0234.jpg"
+  },
+  {
+    "src": "assets/photo-04.jpg",
+    "alt": "The Colosseum at night",
+    "ratio": 0.5625,
+    "source": "DSCF1935.jpg"
+  },
+  {
+    "src": "assets/photo-05.jpg",
+    "alt": "A quiet afternoon by the sea",
+    "ratio": 1.5005861664712778,
+    "source": "DSCF2106.jpg"
+  },
+  {
+    "src": "assets/photo-06.jpg",
+    "alt": "A wall of stickers",
+    "ratio": 0.66640625,
+    "source": "DSCF2382.jpg"
+  },
+  {
+    "src": "assets/photo-07.jpg",
+    "alt": "A colourful coastal hillside",
+    "ratio": 1.7777777777777777,
+    "source": "DSCF2396.jpg"
+  },
+  {
+    "src": "assets/photo-08.jpg",
+    "alt": "Sea view through an arch",
+    "ratio": 0.625,
+    "source": "DSCF2496.jpg"
+  },
+  {
+    "src": "assets/photo-09.jpg",
+    "alt": "Golden geometry underground",
+    "ratio": 0.66640625,
+    "source": "DSCF2551.jpg"
+  },
+  {
+    "src": "assets/photo-10.jpg",
+    "alt": "A sunlit narrow street",
+    "ratio": 0.66640625,
+    "source": "DSCF2737.jpg"
+  }
+]

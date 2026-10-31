@@ -1,0 +1,59 @@
+# Minh Orbit
+
+An interactive personal website built around five rotating 3D head styles: Original, Low poly, Blocks, Cubist and Pop Art. Scroll continuously through diagonal worlds, drag and throw the floating objects, and explore a physical photo pile.
+
+## Run locally
+
+Requires Node.js 22.12 or newer and npm.
+
+```sh
+git clone git@github.com:MinhDuongg/me.git
+cd me
+npm ci
+npm run dev
+```
+
+Open the local address printed by Vite, normally `http://127.0.0.1:5173`.
+
+## Build and check
+
+```sh
+npm test
+npm run preview
+```
+
+`npm test` builds the production website and runs the regression suite. The production output is `dist/`; `npm run preview` serves that output locally. The GitHub workflow performs a clean install, runs the same checks and saves `dist/` as a build artifact.
+
+The build uses relative paths, so `dist/` can be served from a root domain or a subdirectory by any static host. This repository does not depend on the temporary Cloudflare tunnel.
+
+## Interactions
+
+- **Loading:** full-screen playable Pong; automatic entry when all five models and shaders are ready.
+- **Worlds:** wheel/touch scroll follows a continuous diagonal orbit; Page Up/Down changes worlds. The pause button stops the scene motion.
+- **Cat:** click for a meow and its own text bubble.
+- **Camera:** the head says “Check this out!” and ten photographs fall from above, collide and settle at the bottom.
+- **Photos:** tap to enlarge, tap outside or Escape to shrink and resume gravity. Drag to move or throw off-screen. Focus a print and press Delete to dismiss it, or arrows to throw it. Click the camera again to reset the ten-print pile.
+- **CRT computer:** the head introduces the GitHub link to [MinhDuongg](https://github.com/MinhDuongg).
+- **Job application:** click for the application-form jump scare. Tap anywhere or Escape to dismiss.
+- **Phone:** opens Contact.
+- **Text input:** Enter or the arrow plays beep-and-bop speech with synchronized mouth animation and a theme-matched, head-attached dialogue panel.
+
+## Source map
+
+| Path | Purpose |
+| --- | --- |
+| `src/app.js` | Scene scrolling, accessible controls and object actions |
+| `src/head.js` | Three.js renderer, models, hair, lighting and scene placement |
+| `src/scene-props.js` | The five authored 3D props |
+| `src/talking-rig.js`, `src/speech.js` | Mouth deformation and beep timing |
+| `src/photo-pile.js`, `src/photo-physics.js` | Gallery preview, drag/throw handling and Matter.js rigid bodies |
+| `src/pong-loader.js` | Loader/game, inlined by the Vite plugin for immediate startup |
+| `src/job-scare.js` | Application-form overlay and procedural impact sound |
+| `src/style.css`, `src/scenes.js` | Layout, themes and background artwork |
+| `src/photos.json` | The ten photos and their descriptions |
+| `public/assets/` | Head geometry, textures, web-sized photos, fonts and reference image |
+| `tests/` | Physics, timing, projection, interaction and build checks |
+
+All application assets are local. Audio is synthesized in the browser after interaction; no voice or external audio service is used. Reduced-motion settings skip unnecessary motion. The website needs a modern browser with WebGL2 and streaming decompression support.
+
+Third-party notices are in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). The personal head likeness and photographs are project content, not a general-purpose stock asset pack.

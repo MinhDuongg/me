@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#181b1a">
+  <meta name="description" content="Minh Duong — a personal space for ideas, experiments, and different perspectives.">
+  <title>Minh Duong — In my orbit</title>
+  <link rel="preload" href="assets/space-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/archivo-black.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/job-application.png" as="image">
+  <link rel="stylesheet" href="/src/style.css">
+</head>
+<body data-world="original" data-loading="true">
+  <section class="world-loader" id="world-loader" aria-label="Loading all five worlds">
+    <div class="pong-cabinet">
+      <div class="pong-bezel">
+        <div class="pong-screen">
+          <canvas id="loader-pong" width="800" height="600" tabindex="0" role="application" aria-label="Pong while the worlds load. Move your pointer or use the up and down arrow keys to control the left paddle."></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="loader-track" role="progressbar" aria-label="Loading models" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="loader-fill"></span></div>
+    <div class="loader-error"><p id="loader-message" role="alert" hidden></p><button id="loader-retry" hidden>Try again ↗</button></div>
+  </section>
+  <!-- pong-loader -->
+  <main class="universe" id="universe" inert aria-busy="true" aria-label="Minh Duong's personal website">
+    <div class="scene-panels" id="scene-panels"></div>
+    <div class="dialogue-worlds" id="dialogue-worlds"></div>
+    <div class="photo-pile" id="photo-pile" role="group" aria-label="Falling photographs" data-photo-count="0"></div>
+    <div class="light-wash" aria-hidden="true"></div>
+    <button class="light-control" id="pointer-light" hidden aria-label="Mouse-controlled lighting" aria-pressed="true" title="Move your pointer to light the scene. Tap on touch screens. Toggle for fixed studio lighting. Arrow keys move the light when this control is focused."><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 1v3m0 16v3M1 12h3m16 0h3M4 4l2 2m12 12 2 2M4 20l2-2M18 6l2-2"/></svg><span>Move to light</span></button>
+    <section class="head-space" id="original-head" aria-label="Original 3D head, continuously rotating">
+      <h1 class="sr-only">Minh Duong — a personal space for experiments</h1>
+      <img class="head-poster" src="assets/head-poster.png" alt="Minh's original textured head model">
+      <div class="orbit-stage" role="img" aria-label="Rotating original head model"></div>
+      <span class="load-state" data-status aria-live="polite">Finding my head…</span>
+    </section>
+    <div class="scene-note" aria-hidden="true"><span id="scene-medium">01 — THE ORIGINAL</span><span>Look a little closer.</span></div>
+    <aside class="speech-bubble speech-source" id="speech-bubble" aria-hidden="true" role="status" aria-live="polite" aria-atomic="true" hidden>
+      <p id="speech-text" aria-hidden="true"></p><span class="sr-only" id="speech-full"></span>
+      <button class="speech-stop" id="speech-stop" type="button" aria-label="Stop speaking">×</button>
+    </aside>
+    <footer>
+      <div class="scroll-hint" hidden><span class="scroll-icon" aria-hidden="true">↘</span><span>Scroll worlds.<br> Drag the objects.</span></div>
+      <form class="orbit-input-wrap" id="speech-form">
+        <label for="orbit-input" class="sr-only">Text input</label>
+        <input id="orbit-input" class="orbit-input" type="text" inputmode="text" placeholder="Type something to say…" maxlength="240" autocomplete="off" enterkeyhint="send">
+        <button class="speak-button" type="submit" aria-label="Speak text"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></button>
+      </form>
+      <div class="footer-right">
+        <div class="world-dots" hidden role="group" aria-label="Environment"></div>
+        <button id="motion" class="motion-button" aria-label="Pause animation" aria-pressed="false"></button>
+      </div>
+    </footer>
+    <div class="panel-backdrop" hidden></div>
+    <aside class="content-panel" aria-label="Website content" role="dialog" aria-modal="true" hidden>
+      <button class="close-panel" aria-label="Close panel"><span aria-hidden="true">×</span></button>
+      <div class="panel-content"></div>
+    </aside>
+    <span class="sr-only" id="announcement" aria-live="polite"></span>
+  </main>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
