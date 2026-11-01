@@ -11,10 +11,10 @@ function createHarness(reduce=false){
  const step=async(n=120)=>{for(let i=0;i<n;i++){now+=1000/60;frame(now);await Promise.resolve();}};
  const wheel=(deltaY,deltaMode=0,ctrlKey=false)=>listeners.get('wheel')({deltaY,deltaMode,ctrlKey,preventDefault(){}});
  const read=()=>({position:context.orbitState.drift,target:+query('.universe').dataset.scroll,views:context.orbitState.views,rotation:context.orbitState.rotation});
- return{context,query,wheel,step,read,enter:()=>listeners.get('orbit:enter')(),key:key=>listeners.get('keydown')({key,preventDefault(){}})};
+ return{context,query,wheel,step,read,enter:()=>listeners.get('orbit:enter')(),key:(key,repeat=false)=>listeners.get('keydown')({key,repeat,preventDefault(){}})};
 }
 (async()=>{
- const auto=createHarness();auto.enter();assert.equal(auto.query('.universe').dataset.intro,'spinning');await auto.step(300);assert.equal(auto.query('.universe').dataset.intro,'complete');assert(Number.isInteger(auto.read().target));const landing=auto.read().position;await auto.step(300);assert.equal(auto.read().position,landing,'Intro cannot continue rolling after landing');auto.key('PageDown');await auto.step();assert.equal(auto.read().position,landing+1,'Normal scrolling returns after intro');
+ const auto=createHarness();auto.enter();auto.key('ArrowDown',true);assert.equal(auto.query('.universe').dataset.intro,'spinning');await auto.step(300);assert.equal(auto.query('.universe').dataset.intro,'complete');assert(Number.isInteger(auto.read().target));const landing=auto.read().position;await auto.step(300);assert.equal(auto.read().position,landing,'Intro cannot continue rolling after landing');auto.key('PageDown');await auto.step();assert.equal(auto.read().position,landing+1,'Normal scrolling returns after intro');
  const cancelled=createHarness();cancelled.enter();await cancelled.step(20);cancelled.wheel(90);await cancelled.step(1);const cancelledTarget=cancelled.read().target;await cancelled.step(300);assert.equal(cancelled.query('.universe').dataset.intro,'cancelled');assert(Math.abs(cancelled.read().position-cancelledTarget)<1e-5,'Wheel interrupts intro without fighting its target: '+JSON.stringify({actual:cancelled.read().position,target:cancelledTarget}));
  const h=createHarness();h.wheel(120);await h.step();assert(Math.abs(h.read().position-120/1100)<1e-8);assert.equal(h.read().views.length,2);
  const held=h.read().position;await h.step(600);assert.equal(h.read().position,held);assert(h.read().rotation>0);

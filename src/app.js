@@ -192,6 +192,7 @@ document.querySelectorAll('[data-panel]').forEach(b=>b.addEventListener('click',
 document.querySelector('.close-panel').addEventListener('click',closePanel);backdrop.addEventListener('click',closePanel);
 document.querySelector('.wordmark')?.addEventListener('click',e=>{e.preventDefault();closePanel();targetDrift=0;});
 window.addEventListener('keydown',e=>{
+ if(intro.active&&e.repeat){e.preventDefault();return;}
  if(intro.active){cancelIntro();if(e.key==='Escape'){e.preventDefault();return;}}
  if(phone.opened)return;
  if(e.target?.closest?.('input, textarea, select, [contenteditable="true"], .photo-card'))return;
