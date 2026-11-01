@@ -206,8 +206,17 @@ class HairSolver{
  await Promise.all(remaining.map(async id=>{await prepareModel(id);complete++;window.orbitLoader?.progress(50+(complete-1)*10,complete+' / 5 worlds ready');}));
  for(const [id,avatar]of models)talkingRigs.set(id,createTalkingRig(id,avatar,PIVOT));
  root.dataset.talkingModels=String(talkingRigs.size);
- window.orbitLoader?.progress(94,'Warming up the scene');
- for(const visual of visuals.values()){visual.root.visible=true;await renderer.compileAsync(scene,camera);visual.root.visible=false;}
+ window.orbitLoader?.progress(94,'Warming shaders and textures');
+ // Match the two orbit clipping planes before compiling. Compile alone does not upload
+ // texture/geometry buffers or warm the shadow pass, which would stall the first spin.
+ renderer.clippingPlanes=[new THREE.Plane(new THREE.Vector3(1,0,0),10),new THREE.Plane(new THREE.Vector3(-1,0,0),10)];
+ let warmed=0;
+ for(const visual of visuals.values()){
+  visual.root.visible=true;await renderer.compileAsync(scene,camera);renderer.render(scene,camera);visual.root.visible=false;
+  window.orbitLoader?.progress(94+(++warmed),`Warming world ${warmed} / ${visuals.size}`);
+  await new Promise(requestAnimationFrame);
+ }
+
  root.dataset.ready='true';root.dataset.model='original';root.querySelector('.head-poster').setAttribute('aria-hidden','true');root.dataset.textureResolution='4096';root.dataset.backDetail='pores, pigment, roughness, nape follicles';root.dataset.fade='none';root.dataset.modelsLoaded=String(models.size);status.textContent='';
  window.dispatchEvent(new CustomEvent('orbit:model-system-ready'));
  renderer.setSize(stage.clientWidth,stage.clientHeight,false);camera.aspect=stage.clientWidth/stage.clientHeight;camera.zoom=innerWidth<700?Math.min(.52,camera.aspect*.9):.64;camera.updateProjectionMatrix();renderer.autoClear=false;
