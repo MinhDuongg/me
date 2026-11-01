@@ -34,7 +34,7 @@ The workflow builds and tests every push and pull request, then publishes succes
 
 ## Interactions
 
-- **Loading:** full-screen playable Pong; automatic entry when all five models and shaders are ready.
+- **Loading:** full-screen playable Pong; automatic entry when all five models and shaders are ready, followed by a 3.8-second orbit roulette that slows to a random theme. Rolling noise, theme ticks and a short landing cue follow the spin. Tap or use a key during Pong to unlock sound under browser autoplay rules. Scroll, click or press a key to interrupt; reduced motion skips straight to a random theme.
 - **Worlds:** wheel/touch scroll follows a continuous diagonal orbit; Page Up/Down changes worlds. The pause button stops the scene motion.
 - **Cat:** click for a meow and its own text bubble.
 - **Camera:** the head says “Check this out!” and ten photographs fall from above, collide and settle at the bottom.
@@ -55,6 +55,7 @@ The workflow builds and tests every push and pull request, then publishes succes
 | `src/talking-rig.js`, `src/speech.js` | Mouth deformation and beep timing |
 | `src/photo-pile.js`, `src/photo-physics.js` | Gallery preview, drag/throw handling and Matter.js rigid bodies |
 | `src/pong-loader.js` | Loader/game, inlined by the Vite plugin for immediate startup |
+| `src/intro-spin.js`, `src/roll-sound.js` | Finite random-theme roulette and locally synthesized rolling sound |
 | `src/job-scare.js` | Application-form overlay and procedural impact sound |
 | `src/style.css`, `src/scenes.js` | Layout, themes and background artwork |
 | `src/photos.json` | The ten falling photos and their descriptions |

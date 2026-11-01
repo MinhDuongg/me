@@ -9,10 +9,10 @@ export default defineConfig({
     name: 'inline-pong-loader',
     transformIndexHtml: {
       order: 'pre',
-      handler: html => html.replace('<!-- pong-loader -->', `<script>${readFileSync(new URL('./src/pong-loader.js', import.meta.url), 'utf8')}</script>`),
+      handler: html => html.replace('<!-- pong-loader -->', `<script>${readFileSync(new URL('./src/roll-sound.js', import.meta.url), 'utf8')}</script><script>${readFileSync(new URL('./src/pong-loader.js', import.meta.url), 'utf8')}</script>`),
     },
     handleHotUpdate({file, server}) {
-      if (file.endsWith('/pong-loader.js')) server.ws.send({type:'full-reload'});
+      if (file.endsWith('/pong-loader.js') || file.endsWith('/roll-sound.js')) server.ws.send({type:'full-reload'});
     },
   }],
 });

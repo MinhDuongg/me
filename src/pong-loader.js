@@ -42,7 +42,7 @@
  canvas.addEventListener('pointerdown',event=>{move(event);canvas.focus({preventScroll:true});canvas.setPointerCapture(event.pointerId);});
  function enterSite(){
   if(!ready||failed||stopped)return;stop();document.body.dataset.loading='false';const universe=document.querySelector('#universe');universe.inert=false;universe.setAttribute('aria-busy','false');
-  if(loader.contains(document.activeElement))document.activeElement.blur();loader.classList.add('is-complete');setTimeout(()=>loader.hidden=true,reduced.matches?0:450);
+  if(loader.contains(document.activeElement))document.activeElement.blur();loader.classList.add('is-complete');setTimeout(()=>{loader.hidden=true;window.dispatchEvent(new CustomEvent('orbit:enter'));},reduced.matches?0:450);
  }
  loader.addEventListener('keydown',event=>{const key=event.key.length===1?event.key.toLowerCase():event.key;if(['ArrowUp','ArrowDown','w','s'].includes(key)){event.preventDefault();event.stopPropagation();keys.add(key);play();}});
  loader.addEventListener('wheel',event=>{event.preventDefault();event.stopPropagation();},{passive:false});

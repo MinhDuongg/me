@@ -1,9 +1,13 @@
 import {PhonePanel} from './phone.js';
+import {ThemeRoulette} from './intro-spin.js';
 const universe = document.querySelector('.universe');
 const reduced = matchMedia('(prefers-reduced-motion: reduce)');
 const worlds = [{id:'original',label:'Original'},{id:'lowpoly',label:'Low poly'},{id:'blocks',label:'Blocks'},{id:'cubist',label:'Cubist'},{id:'pop',label:'Pop Art'}];
 const state = window.orbitState = {rotation:0,time:0,paused:reduced.matches || new URLSearchParams(location.search).get('motion')==='still',world:0,drift:0,views:[{id:'original',angle:0}],orbit:{x:-.08,y:1.08,low:-1.55,sweep:1.6},satellites:[],hovered:null,dragging:null,speech:{active:false,open:0,pucker:0},light:{x:.27,y:.22,enabled:true,active:false}};
 let targetDrift=0,lastTime=performance.now(),pointerStart=null,ready=false;
+const intro=new ThemeRoulette(worlds.length);
+universe.dataset.intro='waiting';
+function cancelIntro(land=true){if(!intro.active)return;intro.cancel();window.orbitRollSound?.stop();targetDrift=state.drift=land?Math.round(state.drift):state.drift;renderScrollPosition();universe.dataset.intro='cancelled';}
 const loadedWorlds=new Set(['original']),loadingWorlds=new Map();
 const normalized=n=>((n%worlds.length)+worlds.length)%worlds.length;
 const satelliteDefinitions=[
@@ -92,7 +96,7 @@ function applyWorld(index){
  document.querySelector('.head-space').setAttribute('aria-label',`${worlds[index].label} head model, continuously rotating`);
  document.querySelector('.orbit-stage').setAttribute('aria-label',`Rotating ${worlds[index].label.toLowerCase()} head model`);
  [...dots.children].forEach((b,i)=>b.setAttribute('aria-current',String(index===i)));
- document.querySelector('#announcement').textContent=worlds[index].label;
+ if(!intro.active)document.querySelector('#announcement').textContent=worlds[index].label;
  document.querySelector('#scene-medium').textContent=String(index+1).padStart(2,'0')+' — '+['THE ORIGINAL','REDUCED TO FORM','BUILDING BLOCKS','ANOTHER ANGLE','IN FULL COLOR'][index];
  document.querySelector('meta[name="theme-color"]').content=['#181b1a','#d9cdeb','#2545ef','#e4b69c','#f0f14b'][index];
 }
@@ -127,10 +131,18 @@ function renderScrollPosition(){
  universe.dataset.entering=state.views.at(-1).id;universe.dataset.leaving=state.views[0].id;
 }
 window.addEventListener('orbit:model-system-ready',()=>{ready=true;worlds.forEach(w=>loadedWorlds.add(w.id));});
+window.addEventListener('orbit:enter',()=>{
+ const frame=intro.start(state.drift,{reduced:reduced.matches||state.paused});if(!frame)return;
+ targetDrift=state.drift=frame.position;renderScrollPosition();
+ if(!frame.done)window.orbitRollSound?.unlock();
+ universe.dataset.intro=frame.done?'complete':'spinning';universe.dataset.introTarget=worlds[intro.choice].id;universe.dataset.introProgress=frame.progress.toFixed(4);
+ if(frame.done)document.querySelector('#announcement').textContent=worlds[intro.choice].label;
+});
+window.addEventListener('pointerdown',()=>cancelIntro(),{capture:true,passive:true});
 const motion=document.querySelector('#motion');
 function syncMotion(){motion.setAttribute('aria-pressed',String(state.paused));motion.setAttribute('aria-label',state.paused?'Play animation':'Pause animation');motion.innerHTML=state.paused?'<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="m5 3 8 5-8 5Z" fill="currentColor"/></svg>':'<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3v10M11 3v10" stroke="currentColor" stroke-width="1.5"/></svg>';}
 motion.addEventListener('click',()=>{state.paused=!state.paused;syncMotion();});
-reduced.addEventListener('change',e=>{state.paused=e.matches;syncMotion();});
+reduced.addEventListener('change',e=>{if(e.matches)cancelIntro();state.paused=e.matches;syncMotion();});
 syncMotion();
 
 // Keep the text field above the software keyboard without resizing the 3D scene.
@@ -180,6 +192,7 @@ document.querySelectorAll('[data-panel]').forEach(b=>b.addEventListener('click',
 document.querySelector('.close-panel').addEventListener('click',closePanel);backdrop.addEventListener('click',closePanel);
 document.querySelector('.wordmark')?.addEventListener('click',e=>{e.preventDefault();closePanel();targetDrift=0;});
 window.addEventListener('keydown',e=>{
+ if(intro.active){cancelIntro();if(e.key==='Escape'){e.preventDefault();return;}}
  if(phone.opened)return;
  if(e.target?.closest?.('input, textarea, select, [contenteditable="true"], .photo-card'))return;
  if(e.key==='Escape')closePanel();
@@ -189,18 +202,21 @@ window.addEventListener('keydown',e=>{
 window.addEventListener('wheel',e=>{
  if(phone.opened||!panel.hidden||e.ctrlKey||e.target?.closest?.('.head-dialogue, .photo-card'))return;
  if(drag){e.preventDefault();return;}
+ cancelIntro(false);
  e.preventDefault();
  const pixels=e.deltaY*(e.deltaMode===1?16:e.deltaMode===2?innerHeight:1),distance=Math.max(1100,universe.clientHeight*1.35);
  // One normalized input updates one position, including a trackpad's natural momentum tail.
  targetDrift+=Math.max(-distance*.18,Math.min(distance*.18,pixels))/distance;
 },{passive:false});
-universe.addEventListener('touchstart',e=>{if(!phone.opened&&panel.hidden&&!drag&&!e.target?.closest?.('.satellite, input, textarea, .head-dialogue, .photo-card'))pointerStart=e.touches[0].clientY;},{passive:true});
+universe.addEventListener('touchstart',e=>{cancelIntro(false);if(!phone.opened&&panel.hidden&&!drag&&!e.target?.closest?.('.satellite, input, textarea, .head-dialogue, .photo-card'))pointerStart=e.touches[0].clientY;},{passive:true});
 universe.addEventListener('touchmove',e=>{if(phone.opened||!panel.hidden||drag||pointerStart===null)return;const y=e.touches[0].clientY;targetDrift+=(pointerStart-y)/Math.max(600,universe.clientHeight*.95);pointerStart=y;},{passive:true});
 universe.addEventListener('touchend',()=>pointerStart=null);
 universe.addEventListener('touchcancel',()=>pointerStart=null);
 
 function animate(now){
- const dt=Math.min((now-lastTime)/1000,.05);lastTime=now;
+ const dt=Math.max(0,Math.min((now-lastTime)/1000,.05));lastTime=now;
+ let introFrame=null;
+ if(intro.active&&!document.hidden){introFrame=intro.step(dt);targetDrift=state.drift=introFrame.position;window.orbitRollSound?.frame(state.drift,introFrame.progress);universe.dataset.introProgress=introFrame.progress.toFixed(4);universe.dataset.introAudio=window.orbitRollSound?.blocked?'blocked':'playing';if(introFrame.done){window.orbitRollSound?.land();universe.dataset.introAudio=window.orbitRollSound?.blocked?'blocked':'landed';universe.dataset.intro='complete';document.querySelector('#announcement').textContent=worlds[intro.choice].label;}}
  state.speech=speaker.frame(now);universe.dataset.speaking=String(state.speech.active);
  for(const {dialogue}of scenes.values()){
   dialogue.attachment.hidden=speechSource.hidden;dialogue.action.hidden=speechSource.hidden||speaker.text!=='Check out my stuff on my GitHub.';dialogue.node.dataset.speaking=String(state.speech.active);
@@ -208,7 +224,7 @@ function animate(now){
   if(dialogue.full.textContent!==message){dialogue.full.textContent=message;dialogue.measure.textContent=message;}
   if(dialogue.text.textContent!==visible){dialogue.text.textContent=visible;dialogue.text.scrollTop=dialogue.text.scrollHeight;}
  }
- if(!state.paused){state.rotation+=dt*.33;state.time+=dt;}
+ if(!state.paused){state.rotation+=dt*(.33+(introFrame?8*(1-introFrame.progress)**2:0));state.time+=dt;}
  const lightEase=reduced.matches?1:1-Math.exp(-12*dt);state.light.x+=(lightAim.x-state.light.x)*lightEase;state.light.y+=(lightAim.y-state.light.y)*lightEase;
  universe.style.setProperty('--light-x',state.light.x*100+'%');universe.style.setProperty('--light-y',state.light.y*100+'%');
  universe.dataset.pointerLight=String(state.light.enabled);universe.dataset.lightActive=String(state.light.active);

@@ -7,13 +7,15 @@ function createHarness(reduce=false){
  const document={querySelector:query,querySelectorAll:()=>[],createElement:()=>new Node(),body:new Node(),activeElement:null};query('.content-panel').hidden=true;
  const context={document,matchMedia:()=>({matches:reduce,addEventListener(){}}),location:{search:''},URLSearchParams,performance:{now:()=>now},innerHeight:720,requestAnimationFrame:fn=>frame=fn,console};
  context.window=context;context.orbitScenes=Object.fromEntries(['original','lowpoly','blocks','cubist','pop'].map(id=>[id,'']));context.orbitModel={prepare:async()=>true};context.addEventListener=(name,fn)=>listeners.set(name,fn);
- context.PhonePanel=class{constructor(){this.opened=false;context.phone=this;}open(){this.opened=true;}};context.OrbitJobScare=class{show(){}};context.PhotoPile=class{drop(){}};context.OrbitSpeech=class{frame(){return{active:false,open:0,pucker:0};}};context.OrbitPhysics=require('./load-legacy.cjs')('src/object-physics.js');vm.createContext(context);vm.runInContext(source,context);listeners.get('orbit:model-system-ready')();
+ context.ThemeRoulette=new Function(fs.readFileSync('src/intro-spin.js','utf8').replace('export class ThemeRoulette','return class ThemeRoulette'))();context.PhonePanel=class{constructor(){this.opened=false;context.phone=this;}open(){this.opened=true;}};context.OrbitJobScare=class{show(){}};context.PhotoPile=class{drop(){}};context.OrbitSpeech=class{frame(){return{active:false,open:0,pucker:0};}};context.OrbitPhysics=require('./load-legacy.cjs')('src/object-physics.js');vm.createContext(context);vm.runInContext(source,context);listeners.get('orbit:model-system-ready')();
  const step=async(n=120)=>{for(let i=0;i<n;i++){now+=1000/60;frame(now);await Promise.resolve();}};
  const wheel=(deltaY,deltaMode=0,ctrlKey=false)=>listeners.get('wheel')({deltaY,deltaMode,ctrlKey,preventDefault(){}});
  const read=()=>({position:context.orbitState.drift,target:+query('.universe').dataset.scroll,views:context.orbitState.views,rotation:context.orbitState.rotation});
- return{context,query,wheel,step,read,key:key=>listeners.get('keydown')({key,preventDefault(){}})};
+ return{context,query,wheel,step,read,enter:()=>listeners.get('orbit:enter')(),key:key=>listeners.get('keydown')({key,preventDefault(){}})};
 }
 (async()=>{
+ const auto=createHarness();auto.enter();assert.equal(auto.query('.universe').dataset.intro,'spinning');await auto.step(300);assert.equal(auto.query('.universe').dataset.intro,'complete');assert(Number.isInteger(auto.read().target));const landing=auto.read().position;await auto.step(300);assert.equal(auto.read().position,landing,'Intro cannot continue rolling after landing');auto.key('PageDown');await auto.step();assert.equal(auto.read().position,landing+1,'Normal scrolling returns after intro');
+ const cancelled=createHarness();cancelled.enter();await cancelled.step(20);cancelled.wheel(90);await cancelled.step(1);const cancelledTarget=cancelled.read().target;await cancelled.step(300);assert.equal(cancelled.query('.universe').dataset.intro,'cancelled');assert(Math.abs(cancelled.read().position-cancelledTarget)<1e-5,'Wheel interrupts intro without fighting its target: '+JSON.stringify({actual:cancelled.read().position,target:cancelledTarget}));
  const h=createHarness();h.wheel(120);await h.step();assert(Math.abs(h.read().position-120/1100)<1e-8);assert.equal(h.read().views.length,2);
  const held=h.read().position;await h.step(600);assert.equal(h.read().position,held);assert(h.read().rotation>0);
  h.wheel(-120);await h.step();assert.equal(h.read().position,0);
