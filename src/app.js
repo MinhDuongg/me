@@ -134,11 +134,11 @@ window.addEventListener('orbit:model-system-ready',()=>{ready=true;worlds.forEac
 window.addEventListener('orbit:enter',()=>{
  const frame=intro.start(state.drift,{reduced:reduced.matches||state.paused});if(!frame)return;
  targetDrift=state.drift=frame.position;renderScrollPosition();
- if(!frame.done)window.orbitRollSound?.unlock();
+ if(!frame.done)window.orbitRollSound?.frame(frame.position,0);
  universe.dataset.intro=frame.done?'complete':'spinning';universe.dataset.introTarget=worlds[intro.choice].id;universe.dataset.introProgress=frame.progress.toFixed(4);
  if(frame.done)document.querySelector('#announcement').textContent=worlds[intro.choice].label;
 });
-window.addEventListener('pointerdown',()=>cancelIntro(),{capture:true,passive:true});
+window.addEventListener('pointerdown',event=>{if(!event.target?.closest?.('#world-loader'))cancelIntro();},{capture:true,passive:true});
 const motion=document.querySelector('#motion');
 function syncMotion(){motion.setAttribute('aria-pressed',String(state.paused));motion.setAttribute('aria-label',state.paused?'Play animation':'Pause animation');motion.innerHTML=state.paused?'<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="m5 3 8 5-8 5Z" fill="currentColor"/></svg>':'<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3v10M11 3v10" stroke="currentColor" stroke-width="1.5"/></svg>';}
 motion.addEventListener('click',()=>{state.paused=!state.paused;syncMotion();});
@@ -192,6 +192,7 @@ document.querySelectorAll('[data-panel]').forEach(b=>b.addEventListener('click',
 document.querySelector('.close-panel').addEventListener('click',closePanel);backdrop.addEventListener('click',closePanel);
 document.querySelector('.wordmark')?.addEventListener('click',e=>{e.preventDefault();closePanel();targetDrift=0;});
 window.addEventListener('keydown',e=>{
+ if(e.target?.closest?.('#world-loader'))return;
  if(intro.active&&e.repeat){e.preventDefault();return;}
  if(intro.active){cancelIntro();if(e.key==='Escape'){e.preventDefault();return;}}
  if(phone.opened)return;

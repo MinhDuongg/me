@@ -34,7 +34,7 @@ The workflow builds and tests every push and pull request, then publishes succes
 
 ## Interactions
 
-- **Loading:** full-screen playable Pong; automatic entry when all five models and shaders are ready, followed by a 3.8-second orbit roulette that slows to a random theme. Rolling noise, theme ticks and a short landing cue follow the spin. Tap or use a key during Pong to unlock sound under browser autoplay rules. Scroll, click or press a key to interrupt; reduced motion skips straight to a random theme.
+- **Loading:** full-screen playable Pong; **Click to spin** appears when all models and shaders are ready. Clicking unlocks audio and starts the roulette behind Pong. The main scene is revealed roughly a quarter-second later, already spinning; it slows to a random theme over 3.8 seconds. Enter or Space also starts it. Rolling noise, theme ticks and a landing cue follow the spin. Scroll, click or press a key to interrupt; reduced motion skips straight to a random theme.
 - **Worlds:** wheel/touch scroll follows a continuous diagonal orbit; Page Up/Down changes worlds. The pause button stops the scene motion.
 - **Cat:** click for a meow and its own text bubble.
 - **Camera:** the head says “Check this out!” and ten photographs fall from above, collide and settle at the bottom.

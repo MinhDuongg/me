@@ -4,10 +4,12 @@
   constructor(){this.context=null;this.nodes=new Set();this.rolling=null;this.lastBoundary=null;this.active=false;this.blocked=true;}
   unlock(){
    try{
-    const Audio=window.AudioContext||window.webkitAudioContext;if(!Audio)return;
-    this.context ||= new Audio();
-    this.context.resume().then(()=>{this.blocked=this.context.state!=='running';}).catch(()=>{this.blocked=true;});
-   }catch{this.blocked=true;}
+    const Audio=window.AudioContext||window.webkitAudioContext;if(!Audio)return Promise.resolve(false);
+    if(!this.context||this.context.state==='closed'){this.context=new Audio();this.buffer=null;}
+    const context=this.context;
+    if(context.state==='running'){this.blocked=false;return Promise.resolve(true);}
+    return context.resume().then(()=>{this.blocked=context.state!=='running';return !this.blocked;}).catch(()=>{this.blocked=true;return false;});
+   }catch{this.blocked=true;return Promise.resolve(false);}
   }
   noise(){
    if(this.buffer)return this.buffer;
@@ -30,14 +32,14 @@
    }
    const at=context.currentTime,velocity=(1-progress)**2;
    this.rolling.filter.frequency.setTargetAtTime(350+velocity*2200,at,.025);
-   this.rolling.gain.gain.setTargetAtTime(.007+.025*velocity,at,.018);
+   this.rolling.gain.gain.setTargetAtTime(.025+.12*velocity,at,.018);
    const boundary=Math.floor(position);
    if(boundary!==this.lastBoundary){this.click(velocity);this.lastBoundary=boundary;}
   }
   click(speed){
    const context=this.context,at=context.currentTime,noise=this.track(context.createBufferSource()),filter=context.createBiquadFilter(),gain=context.createGain();
    noise.buffer=this.noise();filter.type='highpass';filter.frequency.value=1400;
-   gain.gain.setValueAtTime(.0001,at);gain.gain.exponentialRampToValueAtTime(.04+speed*.025,at+.002);gain.gain.exponentialRampToValueAtTime(.0001,at+.032);
+   gain.gain.setValueAtTime(.0001,at);gain.gain.exponentialRampToValueAtTime(.10+speed*.05,at+.002);gain.gain.exponentialRampToValueAtTime(.0001,at+.032);
    noise.connect(filter);filter.connect(gain);gain.connect(context.destination);noise.start(at);noise.stop(at+.04);
    noise.onended=()=>{this.nodes.delete(noise);noise.disconnect();filter.disconnect();gain.disconnect();};
   }
@@ -47,7 +49,7 @@
    const at=context.currentTime;
    for(const [frequency,offset]of [[440,0],[660,.065]]){
     const oscillator=this.track(context.createOscillator()),gain=context.createGain();oscillator.type='sine';oscillator.frequency.value=frequency;
-    gain.gain.setValueAtTime(.0001,at+offset);gain.gain.exponentialRampToValueAtTime(.04,at+offset+.008);gain.gain.exponentialRampToValueAtTime(.0001,at+offset+.17);
+    gain.gain.setValueAtTime(.0001,at+offset);gain.gain.exponentialRampToValueAtTime(.085,at+offset+.008);gain.gain.exponentialRampToValueAtTime(.0001,at+offset+.17);
     oscillator.connect(gain);gain.connect(context.destination);oscillator.start(at+offset);oscillator.stop(at+offset+.18);
     oscillator.onended=()=>{this.nodes.delete(oscillator);oscillator.disconnect();gain.disconnect();};
    }

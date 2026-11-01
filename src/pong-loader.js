@@ -1,5 +1,5 @@
 (() => {
- const loader=document.querySelector('#world-loader'),canvas=document.querySelector('#loader-pong'),ctx=canvas.getContext('2d'),track=document.querySelector('.loader-track'),fill=document.querySelector('#loader-fill'),message=document.querySelector('#loader-message');
+ const loader=document.querySelector('#world-loader'),canvas=document.querySelector('#loader-pong'),ctx=canvas.getContext('2d'),track=document.querySelector('.loader-track'),fill=document.querySelector('#loader-fill'),message=document.querySelector('#loader-message'),enter=document.querySelector('#loader-enter');
  const reduced=matchMedia('(prefers-reduced-motion: reduce)'),keys=new Set();
  const game={x:0,y:300,vx:-230,vy:145,left:300,right:300,a:0,b:0};
  const clamp=(v,lo,hi)=>Math.max(lo,Math.min(hi,v)),H=600;
@@ -41,17 +41,35 @@
  canvas.addEventListener('pointermove',move);
  canvas.addEventListener('pointerdown',event=>{move(event);canvas.focus({preventScroll:true});canvas.setPointerCapture(event.pointerId);});
  function enterSite(){
-  if(!ready||failed||stopped)return;stop();document.body.dataset.loading='false';const universe=document.querySelector('#universe');universe.inert=false;universe.setAttribute('aria-busy','false');
-  if(loader.contains(document.activeElement))document.activeElement.blur();loader.classList.add('is-complete');setTimeout(()=>{loader.hidden=true;window.dispatchEvent(new CustomEvent('orbit:enter'));},reduced.matches?0:450);
+  if(!ready||failed||stopped)return;
+  // This runs inside the click/key gesture, before any timer or promise loses audio permission.
+  stop();loader.dataset.entering='true';loader.dataset.audioReady='pending';
+  enter.setAttribute('aria-disabled','true');enter.textContent='Spinning…';
+  Promise.resolve(window.orbitRollSound?.unlock()).then(enabled=>loader.dataset.audioReady=String(!!enabled));
+  loader.dataset.spinStartedAt=performance.now().toFixed(1);
+  window.dispatchEvent(new CustomEvent('orbit:enter'));
+  setTimeout(()=>{
+   const universe=document.querySelector('#universe');
+   universe.dataset.revealedAt=performance.now().toFixed(1);
+   universe.inert=false;universe.setAttribute('aria-busy','false');document.body.dataset.loading='false';
+   if(loader.contains(document.activeElement))document.activeElement.blur();
+   loader.classList.add('is-complete');loader.hidden=true;
+  },220);
  }
- loader.addEventListener('keydown',event=>{const key=event.key.length===1?event.key.toLowerCase():event.key;if(['ArrowUp','ArrowDown','w','s'].includes(key)){event.preventDefault();event.stopPropagation();keys.add(key);play();}});
+ enter.addEventListener('click',event=>{event.stopPropagation();enterSite();});
+ loader.addEventListener('click',event=>{if(event.target!==document.querySelector('#loader-retry'))enterSite();});
+ loader.addEventListener('keydown',event=>{
+  const key=event.key.length===1?event.key.toLowerCase():event.key;
+  if(ready&&['Enter',' '].includes(key)){event.preventDefault();event.stopPropagation();if(!event.repeat)enterSite();return;}
+  if(['ArrowUp','ArrowDown','w','s'].includes(key)){event.preventDefault();event.stopPropagation();keys.add(key);play();}
+ });
  loader.addEventListener('wheel',event=>{event.preventDefault();event.stopPropagation();},{passive:false});
  loader.addEventListener('keyup',event=>{keys.delete(event.key.length===1?event.key.toLowerCase():event.key);event.stopPropagation();});
  window.addEventListener('blur',()=>keys.clear());window.addEventListener('resize',resize);canvas.addEventListener('blur',()=>keys.clear());
  window.orbitLoader={
   progress(value,detail){progress=Math.max(progress,clamp(Number(value)||0,0,100));fill.style.transform='scaleX('+progress/100+')';track.setAttribute('aria-valuenow',String(progress));track.setAttribute('aria-valuetext',detail);},
-  finish(){if(stopped||failed)return;this.progress(100,'All five worlds ready');ready=true;loader.dataset.ready='true';enterSite();},
-  fail(){failed=true;stop();loader.dataset.failed='true';message.textContent='Couldn’t load the worlds. Check your connection and try again.';message.hidden=false;document.querySelector('#loader-retry').hidden=false;}
+  finish(){if(stopped||failed)return;this.progress(100,'All five worlds ready');ready=true;loader.dataset.ready='true';enter.hidden=false;},
+  fail(){failed=true;enter.hidden=true;stop();loader.dataset.failed='true';message.textContent='Couldn’t load the worlds. Check your connection and try again.';message.hidden=false;document.querySelector('#loader-retry').hidden=false;}
  };
  document.querySelector('#loader-retry').addEventListener('click',()=>location.reload());
  resize();canvas.focus({preventScroll:true});frame=requestAnimationFrame(tick);

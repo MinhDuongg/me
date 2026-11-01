@@ -100,3 +100,7 @@ footer{left:40px;right:40px;bottom:max(28px,env(safe-area-inset-bottom));padding
 .job-scare-close:hover{background:#fff}.job-scare-close:focus-visible{outline:2px solid #111;outline-offset:4px}
 @keyframes job-scare-impact{0%{transform:scale(1.8) rotate(-2deg);filter:blur(5px)}30%{transform:scale(1.12) translateX(7px) rotate(.6deg);filter:blur(0)}60%{transform:scale(1.04) translateX(-4px)}100%{transform:scale(1)}}
 @media(prefers-reduced-motion:reduce){.job-scare>img{animation:none}}
+
+/* The entry click starts the roulette under Pong; the cover is removed roughly a quarter-second later. */
+.loader-enter{position:absolute;z-index:6;left:50%;bottom:max(48px,calc(env(safe-area-inset-bottom) + 40px));transform:translateX(-50%);min-height:48px;min-width:172px;padding:12px 24px;border:1px solid #e2ffffbd;border-radius:30px;background:#e2ffff;color:#083f78;font:600 14px/1.25 Space,Arial,sans-serif;box-shadow:0 4px 25px #00296644;white-space:nowrap;transition:background .15s,box-shadow .15s}
+.loader-enter:hover{background:#fff;box-shadow:0 4px 30px #b1ecff44}.loader-enter:focus-visible{outline:3px solid #fff;outline-offset:5px}.loader-enter:active{background:#b3ecfa}.world-loader[data-entering=true] .loader-enter{pointer-events:none;background:#ceeef5;color:#315974}
