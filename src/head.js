@@ -7,6 +7,7 @@ import * as THREE from 'three';
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js';
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
 import {RoomEnvironment} from 'three/examples/jsm/environments/RoomEnvironment.js';
+import {MeshoptDecoder} from 'three/examples/jsm/libs/meshopt_decoder.module.js';
 
 const root=document.getElementById('original-head'),stage=root.querySelector('.orbit-stage'),status=root.querySelector('[data-status]');
 try{
@@ -162,7 +163,26 @@ class HairSolver{
  function registerModel(id,object){const visual=new THREE.Group();visual.name='Complete scene / '+id;object.visible=true;object.traverse(n=>{if(n.isMesh){n.castShadow=!n.userData.fiberLayer;n.receiveShadow=true;}});visual.add(object);const headBounds=new THREE.Box3().setFromObject(object),rearZ=headRearPlane(headBounds,PIVOT),anchor=makeHeadAnchor(object,headBounds);const props=createSceneProps(id);props.objects.forEach(prop=>{prop.userData.depthRadius=new THREE.Box3().setFromObject(prop).getBoundingSphere(new THREE.Sphere()).radius;});visual.add(props.group);
   const receiver=new THREE.Mesh(new THREE.PlaneGeometry(8,8),new THREE.ShadowMaterial({color:0x080c13,opacity:id==='original'?.65:.35,depthWrite:false}));receiver.position.z=-.25;receiver.receiveShadow=true;receiver.name='Shadow backdrop';visual.add(receiver);
   visual.visible=false;scene.add(visual);models.set(id,object);visuals.set(id,{root:visual,props:props.objects,rearZ,receiver,anchor,dialogue:document.querySelector('[data-dialogue="'+id+'"]')});return object;}
- registerModel('original',headGroup);
+ // The revised 4K model has a new UV layout and groom; load it as one authored asset.
+ window.orbitLoader?.progress(42,'Loading updated realistic head');
+ const realisticGLTF=await new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).loadAsync('assets/head-realistic.glb');
+ const revisedHead=new THREE.Group();revisedHead.position.set(...PIVOT);
+ const revisedLocal=new THREE.Group();revisedLocal.position.set(-PIVOT[0],-PIVOT[1],-PIVOT[2]);
+ revisedLocal.add(realisticGLTF.scene);revisedHead.add(revisedLocal);
+ revisedHead.userData.speechMouth={x:.0000976112,y:-.036703842,z:.0575237283,width:.0211};
+ realisticGLTF.scene.traverse(mesh=>{
+  if(!mesh.isMesh)return;
+  if(/Head.*full.surface.textured.skin/.test(mesh.name))mesh.name='Original textured skin';
+  if(/individually.tapered.fibers/i.test(mesh.name))mesh.userData.fiberLayer=true;
+  for(const material of Array.isArray(mesh.material)?mesh.material:[mesh.material]){
+   for(const key of ['map','normalMap','roughnessMap'])if(material[key])material[key].anisotropy=Math.min(16,renderer.capabilities.getMaxAnisotropy());
+  }
+ });
+ headGroup.removeFromParent();
+ registerModel('original',revisedHead);
+ root.dataset.realisticRevision='2026-11-01-fringe';root.dataset.skin='Authored 4K whole-head maps';
+ root.dataset.strandCount='72843';root.dataset.hair='Revised tapered fiber groom';
+
  async function prepareModel(id){
   if(models.has(id))return models.get(id);if(pending.has(id))return pending.get(id);
   const promise=(async()=>{let object;
@@ -188,7 +208,7 @@ class HairSolver{
  root.dataset.talkingModels=String(talkingRigs.size);
  window.orbitLoader?.progress(94,'Warming up the scene');
  for(const visual of visuals.values()){visual.root.visible=true;await renderer.compileAsync(scene,camera);visual.root.visible=false;}
- root.dataset.ready='true';root.dataset.model='original';root.querySelector('.head-poster').setAttribute('aria-hidden','true');root.dataset.textureResolution='2048';root.dataset.backDetail='pores, pigment, roughness, nape follicles';root.dataset.fade='none';root.dataset.modelsLoaded=String(models.size);status.textContent='';
+ root.dataset.ready='true';root.dataset.model='original';root.querySelector('.head-poster').setAttribute('aria-hidden','true');root.dataset.textureResolution='4096';root.dataset.backDetail='pores, pigment, roughness, nape follicles';root.dataset.fade='none';root.dataset.modelsLoaded=String(models.size);status.textContent='';
  window.dispatchEvent(new CustomEvent('orbit:model-system-ready'));
  renderer.setSize(stage.clientWidth,stage.clientHeight,false);camera.aspect=stage.clientWidth/stage.clientHeight;camera.zoom=innerWidth<700?Math.min(.52,camera.aspect*.9):.64;camera.updateProjectionMatrix();renderer.autoClear=false;
  function screenPoint(x,y,w,h,z=-.018){return screenToPlane(camera,x,y,w,h,z);}

@@ -30,7 +30,7 @@ The build uses relative paths, so `dist/` can be served from a root domain or a 
 
 In the repository's **Settings → Pages**, select **GitHub Actions** as the publishing source. GitHub Free requires a public repository for Pages; a private source repository requires a supported paid plan.
 
-The workflow builds and tests every push and pull request, then publishes successful builds from the repository's default branch. It can also be started from **Actions → Build, test and deploy → Run workflow**. The project address after deployment is `https://minhduongg.github.io/me/`.
+The workflow builds and tests every push and pull request, then publishes successful builds from `main`. It can also be started from **Actions → Build, test and deploy → Run workflow**. The project address after deployment is `https://minhduongg.github.io/me/`.
 
 ## Interactions
 
@@ -69,3 +69,7 @@ Third-party notices are in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). The
 ## Refresh the phone gallery
 
 The phone gallery contains a web export of the selected local folder. To include new photos later, install Pillow and run `python3 scripts/import-photos.py /path/to/photos`, then commit and push the generated assets and manifest. The importer reads supported images recursively, creates thumbnails and 1600px images without EXIF metadata, and leaves originals unchanged. No local folder path is published. The falling photo pile uses its own ten-image selection.
+
+## Realistic model revision (1 November 2026)
+
+`public/assets/head-realistic.glb` is the updated authored head, corrected facial proportions, rigid photographic eyes, refined fringe, and whole-head 4K maps. Its mesh and UV layout are loaded together, replacing the earlier procedural realistic presentation. It preserves all 72,843 exported hair fibers and the source triangle count. WebP textures are lossless; Meshopt uses 16-bit positions/UVs and 12-bit normals. Source Blender and raw exchange files remain in the local `outputs/head_models/01_realistic/` collection; the 141 MB raw GLB is above GitHub’s file limit. Export provenance is in `public/assets/realistic-model.json`. The other four styles retain their own existing assets and UVs.

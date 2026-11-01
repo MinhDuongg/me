@@ -1,6 +1,7 @@
 # Third-party notices
 
 - **Three.js 0.170.0:** MIT, notice in `licenses/three-MIT.txt`.
+- **Meshoptimizer 0.18 decoder (bundled with Three.js):** MIT, notice in `licenses/meshoptimizer-MIT.txt`.
 - **Matter.js 0.20.0:** MIT, notice in `public/assets/MATTER_LICENSE.txt`.
 - **Space Grotesk and Archivo Black fonts:** SIL Open Font License, notices alongside the WOFF2 files in `public/assets/`.
 - **MakeHuman base assets:** MakeHuman-distributed base mesh assets are CC0; the original output/license explanation is preserved in `licenses/MakeHuman.md`. The MakeHuman program is not included.

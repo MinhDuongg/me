@@ -22,6 +22,7 @@ export function createTalkingRig(id,avatar,pivot){
  let mouth={x:-.000064,y:-.034774,z:.05743,width:.0211};
  if(id==='cubist')mouth={x:.0008,y:-.047,z:.048,width:.024};
  if(id==='pop')mouth={x:-.00007,y:-.0353,z:.055,width:.021};
+ if(avatar.userData.speechMouth)mouth={...avatar.userData.speechMouth};
  let unit=1;
  if(source){const p=new THREE.Vector3(mouth.x,mouth.y,mouth.z).applyMatrix4(source.matrixWorld);unit=new THREE.Vector3().setFromMatrixScale(source.matrixWorld).x;mouth={x:p.x,y:p.y,z:p.z,width:mouth.width*unit};}
  const invAvatar=avatar.matrixWorld.clone().invert(),group=new THREE.Group();group.name='Speech · oral cavity';

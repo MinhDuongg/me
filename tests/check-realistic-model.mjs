@@ -1,0 +1,34 @@
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+import * as THREE from 'three';
+import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
+import {MeshoptDecoder} from 'three/examples/jsm/libs/meshopt_decoder.module.js';
+import {createTalkingRig} from '../src/talking-rig.js';
+const raw=fs.readFileSync('public/assets/head-realistic.glb');
+assert(raw.length<100*1024*1024,'Asset fits GitHub’s individual-file limit');
+const jsonLength=raw.readUInt32LE(12),json=JSON.parse(raw.subarray(20,20+jsonLength));
+assert(json.extensionsRequired.includes('EXT_meshopt_compression'));
+assert.equal(json.images.length,4);assert(json.images.every(image=>image.mimeType==='image/webp'));
+let triangles=0;
+for(const mesh of json.meshes)for(const primitive of mesh.primitives)triangles+=json.accessors[primitive.indices].count/3;
+assert.equal(triangles,2468228,'All authored source triangles are preserved');
+// Decode actual compressed geometry without requiring a DOM image loader in Node.
+delete json.materials;delete json.textures;delete json.images;delete json.samplers;
+for(const mesh of json.meshes)for(const primitive of mesh.primitives)delete primitive.material;
+const body=Buffer.from(JSON.stringify(json)),padding=(4-body.length%4)%4,chunk=Buffer.concat([body,Buffer.alloc(padding,32)]),binary=raw.subarray(20+jsonLength),header=Buffer.alloc(20);
+header.writeUInt32LE(0x46546c67,0);header.writeUInt32LE(2,4);header.writeUInt32LE(20+chunk.length+binary.length,8);header.writeUInt32LE(chunk.length,12);header.writeUInt32LE(0x4e4f534a,16);
+const data=Buffer.concat([header,chunk,binary]);
+const gltf=await new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).parseAsync(data.buffer.slice(data.byteOffset,data.byteOffset+data.byteLength),'');
+const avatar=new THREE.Group();avatar.userData.speechMouth={x:.0000976112,y:-.036703842,z:.0575237283,width:.0211};avatar.add(gltf.scene);
+const eyes=[];let skin;
+avatar.traverse(mesh=>{if(!mesh.isMesh)return;if(/Head.*full.surface.textured.skin/.test(mesh.name)){skin=mesh;mesh.name='Original textured skin';}if(/Eyeball/.test(mesh.name))eyes.push(mesh);});
+assert(skin&&skin.geometry.attributes.uv);assert.equal(eyes.length,2);
+const bounds=new THREE.Box3().setFromObject(avatar),size=bounds.getSize(new THREE.Vector3());
+assert(size.x>.15&&size.x<.2&&size.y>.23&&size.y<.3,'Model remains at its authored metric scale');
+const eyeGeometry=eyes.map(mesh=>mesh.geometry.attributes.position.array.slice());
+const rig=createTalkingRig('original',avatar,[0,-.05,-.035]);assert.equal(rig.count,1);
+const jaw=skin.geometry.getAttribute('speechJawDelta');let moving=0;
+for(const value of jaw.array){assert(Number.isFinite(value));if(value!==0)moving++;}
+assert(moving>1000,'The corrected face retains a functional speech rig');rig.update(.7,.2);
+eyes.forEach((mesh,i)=>assert.deepEqual(mesh.geometry.attributes.position.array,eyeGeometry[i],'Eyes stay rigid'));
+console.log(`PASS: revised 4K asset, ${triangles} source triangles, Meshopt decoding, metric scale, speech deformation and rigid eyes.`);

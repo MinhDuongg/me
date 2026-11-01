@@ -1,0 +1,42 @@
+{
+  "revision": "2026-11-01-fringe",
+  "source": "outputs/head_models/01_realistic/head_realistic_static.glb",
+  "source_sha256": "9be1fdfe863c7a23438802231c752c8c3cb9708971642ad974ac5413e6cb7be0",
+  "source_bytes": 141478724,
+  "web_sha256": "e51b664bab9551055bcba7b725338a8838173dfba82b6f0d40858f0cf66dfaa8",
+  "web_bytes": 48080756,
+  "source_triangles": 2468228,
+  "web_triangles": 2468228,
+  "exported_hair_fibers": 72843,
+  "textures": {
+    "size": 4096,
+    "encoding": "lossless WebP",
+    "UV_layout": "revised whole-head UVs, bundled with geometry"
+  },
+  "geometry_encoding": {
+    "extension": "EXT_meshopt_compression",
+    "position_bits": 16,
+    "normal_bits": 12,
+    "uv_bits": 16
+  },
+  "tool": "@gltf-transform/cli 4.5.1",
+  "source_revision": {
+    "adjustment": "Longer, softer front fringe with light layered tips and a subtle sideways fall",
+    "modified_front_fibers": 12838,
+    "target_extension_mm": {
+      "median": 9.314179420471191,
+      "p90": 14.0,
+      "maximum": 14.0
+    },
+    "roots_unchanged": true,
+    "short_undercoat_unchanged": true,
+    "sides_back_and_crown_unchanged_outside_front_selection": true,
+    "face_skin_and_UVs_unchanged": true,
+    "minimum_eye_clearance_mm": [
+      19.098019807969116,
+      17.74837123419374
+    ],
+    "face_basis_sha256": "a5da339ce823b76f81259090d24457897514cf360fcb9b48c67087bcc35e5959",
+    "face_geometry_unchanged": true
+  }
+}
